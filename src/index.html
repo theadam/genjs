@@ -1,13 +1,24 @@
 <html>
-	<head>
-		<script src='evolver.js' type='text/javascript'></script>
-		<script src='string-descriptor.js' type='text/javascript'></script>
-	</head>
-	<body>
-		<script type='text/javascript'>
-			var descriptor = new StringEvolverDescriptor("Adam!");
-			var evolver = new Evolver(descriptor.creator, descriptor.fitnessEvaluator, descriptor.mutator);
-			evolver.evolve({ewvolutionHook : descriptor.hook})
-		</script>
-	</body>
+<head>
+	<script src='evolver.js' type='text/javascript'></script>
+	<script src='string-descriptor.js' type='text/javascript'></script>
+</head>
+<body>
+	<input type='text' value='GenJS is Awesome!' id='text' />
+	<input type='button' id='button' value='Evolve' />
+	<div id='genjs-display' />
+	<script type='text/javascript'>
+		document.getElementById('button').onclick = function(){
+			if(window.evolver !== undefined){
+				evolver.terminator = function(){return true};
+				evolver = undefined;
+			}
+			var string = document.getElementById('text').value;
+			
+			var descriptor = new StringEvolverDescriptor(string);
+			evolver = new Evolver(descriptor.creator, descriptor.fitnessEvaluator, descriptor.pipeline);
+			evolver.evolve({generationHook : descriptor.hook})
+		}
+	</script>
+</body>
 </html>

@@ -10,7 +10,7 @@ function StringEvolverDescriptor(goal){
 				return total;
 			}
 		},
-	
+
 		creator : function(opts){
 			var value = '';
 			for(var i = 0; i < goal.length; i++){
@@ -18,31 +18,26 @@ function StringEvolverDescriptor(goal){
 			}
 			return value;
 		},
-	
-		/*var mate = function(population){
-			var index = Math.floor(Math.random() * this.value.length);
-			var child = new StringGene(this.opts);
-			child.value = this.value.substr(0, index) + other.value.substr(index);
-			return child;
-		},*/
 
-		mutator : function(probability){
-			return function(population){
-				var newPopulation = [];
-				for(var i = 0; i < population.length; i++){
-					var string = population[i];
-					if(Math.random() >= probability){
-						var index = Math.floor(Math.random() * string.length);
+		pipeline : EvolverUtils.operatorPipeline(
+			EvolverUtils.wrapMater(function(parent1, parent2){
+				var index = Math.floor(Math.random() * parent1.length);
+				var value = parent1.substr(0, index) + parent2.substr(index);
+				return value;
+			}), 
+			function(probability){
+				return EvolverUtils.wrapMutator(function(candidate){
+					if(Math.random() <= probability){
+						var index = Math.floor(Math.random() * candidate.length);
 						var twiddle = Math.random() <= 0.5 ? 1 : -1;
-						var newChar = String.fromCharCode(string.charCodeAt(index) + twiddle);
-						string = string.substr(0, index) + newChar + string.substr(index + 1);
+						var newChar = String.fromCharCode(candidate.charCodeAt(index) + twiddle);
+						candidate = candidate.substr(0, index) + newChar + candidate.substr(index + 1);
 					}
-					newPopulation.push(string);
-				}
-				return newPopulation;
-			}
-		}(0.5),
-		
+					return candidate;
+				});
+			}(0.5)
+		),
+
 		hook : function(evolver){
 			var population = evolver.population;
 			var htmlString = '';
@@ -53,7 +48,8 @@ function StringEvolverDescriptor(goal){
 				htmlString += '<li>' + member.candidate +' (' + member.fitness + ')</li>';
 			}
 			htmlString += '</ul>';
-			document.body.innerHTML = htmlString;
+			document.getElementById('genjs-display').innerHTML = htmlString;
 		}
 	}
 }
+
