@@ -1,0 +1,17 @@
+.row {
+	display: block;
+}
+
+.cell {
+	border-width: 1px;
+	border-style: solid;
+	display: inline-block;
+}
+
+.black {	
+	background-color: black;
+}
+
+.red {
+	background-color: red;
+}

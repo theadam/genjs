@@ -1,4 +1,14 @@
 var EvolverUtils = {
+	arrayContains : function(array, value){
+	    var i = array.length;
+	    while (i--) {
+	       if (array[i] === value) {
+	           return true;
+	       }
+	    }
+	    return false;
+	},
+	
 	binarySearchArray : function(array, value){
 		var mid = 0;
 		var low = 0;
@@ -117,6 +127,7 @@ function Evolver(candidateCreator, fitnessEvaluator, evolutionOperator){
 	this.fitnessEvaluator = fitnessEvaluator;
 	this.evolutionOperator = evolutionOperator;
 	this.generationCount = 0;
+	this.isTerminated = false;
 	this.sortFunction = fitnessEvaluator.isNatural?
 	function(a,b){return b.fitness-a.fitness} :
 	function(a,b){return a.fitness-b.fitness};
@@ -171,13 +182,16 @@ Evolver.prototype.runEvolutionStep = function(){
 	this.bestFitness = this.population[0].fitness;
 	this.bestCandidate = this.population[0].candidate;
 
-	this.generationHook(this);
 	if(this.terminator(this)){
-		return this.population[0];
+		this.isTerminated = true;
 	}
+	this.generationHook(this);
+	
 	this.generationCount++
 	var scope = this;
-	setTimeout(function(){scope.runEvolutionStep()}, 20);
+	if(!this.isTerminated){
+		setTimeout(function(){scope.runEvolutionStep()}, 20);
+	}
 }
 
 
