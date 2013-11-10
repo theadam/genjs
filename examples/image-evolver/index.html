@@ -1,0 +1,44 @@
+<html>
+<head>
+	<script src='../../src/evolver.js' type='text/javascript'></script>
+	<script src='image-descriptor.js' type='text/javascript'></script>
+	<script src="http://code.jquery.com/jquery-1.10.2.min.js"></script>
+</head>
+<body>
+	<div>
+		<input type='button' id='button' value='Evolve' />
+		<span width="100%" ><input type='text' value='uploads6.wikipaintings.org/images/leonardo-da-vinci/mona-lisa.jpg' id='text' width="100%"/></span>
+	</div>
+	<canvas id="image-canvas" width="0" height="0"></canvas>
+	<div id="gencount" ></div>
+	<canvas id="candidate"></canvas>
+	<script type='text/javascript'>
+		document.getElementById('button').onclick = function(){
+			var can = document.getElementById("image-canvas");
+			var ctx = can.getContext('2d');
+			var img = document.createElement("img");
+			img.onload = function(){
+				can.width = (300.0 * img.width)/ img.height;
+				can.height = 300;
+				var can2 = document.getElementById("candidate");
+				can2.width = can.width;
+				can2.height = can.height;
+				
+				ctx.drawImage(img, 0, 0, can.width, can.height);
+				
+				if(window.evolver !== undefined){
+					evolver.terminator = function(){return true};
+					evolver = undefined;
+				}
+				
+				var descriptor = new ImageEvolverDescriptor(can);
+				evolver = new Evolver(descriptor.creator, descriptor.fitnessEvaluator, descriptor.pipeline);
+				evolver.evolve({generationHook : descriptor.hook, populationSize: 10})
+			}
+			img.crossOrigin = 'Anonymous';
+			var string = document.getElementById('text').value;
+			img.src='http://www.corsproxy.com/' + string;
+		}
+	</script>
+</body>
+</html>
