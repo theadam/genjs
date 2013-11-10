@@ -1,7 +1,3 @@
-function initBoard(){
-	
-}
-
 function NQueens(size){
 	return {
 		creator : function(opts){
@@ -13,33 +9,30 @@ function NQueens(size){
 			return candidate;
 		},
 		
-		fitnessEvaluator : {
-			isNatural : false,
-			evaluate : function(candidate) {
-				tlTobr = [];
-				blTotr = [];
-				var i;
-				for (i = 0; i < candidate.length; i++) {
-					if(tlTobr[candidate[i] + i] === undefined){
-						tlTobr[candidate[i] + i] = 0;
-					}
-					if(blTotr[(candidate[i] - i) + candidate.length - 1] === undefined){
-						blTotr[(candidate[i] - i) + candidate.length - 1] = 0;
-					}
-					tlTobr[candidate[i] + i] += 1;
-					blTotr[(candidate[i] - i) + candidate.length - 1] += 1;
+		fitnessEvaluator : function(candidate) {
+			tlTobr = [];
+			blTotr = [];
+			var i;
+			for (i = 0; i < candidate.length; i++) {
+				if(tlTobr[candidate[i] + i] === undefined){
+					tlTobr[candidate[i] + i] = 0;
 				}
-				var ret = 0;
-				for (i = 0; i < candidate.length * 2 - 1; i++) {
-					if (tlTobr[i] > 1) {
-						ret += (tlTobr[i] - 1);
-					}
-					if (blTotr[i] > 1) {
-						ret += (blTotr[i] - 1);
-					}
+				if(blTotr[(candidate[i] - i) + candidate.length - 1] === undefined){
+					blTotr[(candidate[i] - i) + candidate.length - 1] = 0;
 				}
-				return ret;
+				tlTobr[candidate[i] + i] += 1;
+				blTotr[(candidate[i] - i) + candidate.length - 1] += 1;
 			}
+			var ret = 0;
+			for (i = 0; i < candidate.length * 2 - 1; i++) {
+				if (tlTobr[i] > 1) {
+					ret += (tlTobr[i] - 1);
+				}
+				if (blTotr[i] > 1) {
+					ret += (blTotr[i] - 1);
+				}
+			}
+			return ret;
 		},
 
 		pipeline : EvolverUtils.operatorPipeline(

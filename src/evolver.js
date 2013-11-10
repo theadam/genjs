@@ -124,7 +124,15 @@ var EvolverUtils = {
 
 function Evolver(candidateCreator, fitnessEvaluator, evolutionOperator){
 	this.candidateCreator = candidateCreator;
-	this.fitnessEvaluator = fitnessEvaluator;
+	if(typeof fitnessEvaluator === 'function'){
+		this.fitnessEvaluator = {
+			isNatural:false, 
+			evaluate:fitnessEvaluator
+		}
+	}
+	else{
+		this.fitnessEvaluator = fitnessEvaluator;
+	}
 	this.evolutionOperator = evolutionOperator;
 	this.generationCount = 0;
 	this.isTerminated = false;

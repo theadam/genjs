@@ -1,14 +1,11 @@
 function StringEvolverDescriptor(goal){
 	return {
-		fitnessEvaluator : {
-			isNatural : false,
-			evaluate : function(candidate){
-				var total = 0;
-				for(var i = 0; i < goal.length; i++){
-					total += (goal.charCodeAt(i) - candidate.charCodeAt(i)) * (goal.charCodeAt(i) - candidate.charCodeAt(i));
-				}
-				return total;
+		fitnessEvaluator : function(candidate){
+			var total = 0;
+			for(var i = 0; i < goal.length; i++){
+				total += (goal.charCodeAt(i) - candidate.charCodeAt(i)) * (goal.charCodeAt(i) - candidate.charCodeAt(i));
 			}
+			return total;
 		},
 
 		creator : function(opts){
