@@ -137,8 +137,14 @@ function Evolver(candidateCreator, fitnessEvaluator, evolutionOperator){
 	this.generationCount = 0;
 	this.isTerminated = false;
 	this.sortFunction = fitnessEvaluator.isNatural?
-	function(a,b){return b.fitness-a.fitness} :
-	function(a,b){return a.fitness-b.fitness};
+	function(a,b){
+			var fitnessDiff = b.fitness-a.fitness;
+			return fitnessDiff != 0 ? fitnessDiff : a.age - b.age;
+		} :
+	function(a,b){
+			var fitnessDiff = a.fitness-b.fitness;
+			return fitnessDiff != 0 ? fitnessDiff : a.age - b.age;
+		};
 }
 
 Evolver.prototype.evolve = function(opts){
@@ -162,16 +168,20 @@ Evolver.prototype.evolve = function(opts){
 	for(var i = 0; i < this.populationSize; i++){
 		var candidate = this.candidateCreator(opts);
 		var fitness = this.fitnessEvaluator.evaluate(candidate);
-		this.population.push({candidate: candidate, fitness: fitness, isNatural: this.fitnessEvaluator.isNatural});
+		this.population.push({candidate: candidate, fitness: fitness, isNatural: this.fitnessEvaluator.isNatural, age: 1});
 	} 
 	this.population.sort(this.sortFunction);
 	this.bestFitness = this.population[0].fitness;
 	this.bestCandidate = this.population[0].candidate;
+	this.bestAge = this.population[0].age;
 	this.runEvolutionStep();
 }
 
 Evolver.prototype.runEvolutionStep = function(){
 	var elite = this.population.slice(0, this.eliteCount);
+	for(var i = 0; i< elite.length;i++){
+		elite[i].age += 1;
+	}
 
 	var selection = this.selectFunction(this.population, this.population.length - this.eliteCount);
 
@@ -181,7 +191,7 @@ Evolver.prototype.runEvolutionStep = function(){
 	for(var i = 0; i < nextGen.length; i++){
 		var candidate = nextGen[i];
 		var fitness = this.fitnessEvaluator.evaluate(candidate);
-		evaluatedNextGen.push({candidate: candidate, fitness: fitness, isNatural: this.fitnessEvaluator.isNatural});
+		evaluatedNextGen.push({candidate: candidate, fitness: fitness, isNatural: this.fitnessEvaluator.isNatural, age: 1});
 	}
 
 	this.population = elite.concat(evaluatedNextGen);	
@@ -189,6 +199,7 @@ Evolver.prototype.runEvolutionStep = function(){
 	this.population.sort(this.sortFunction);
 	this.bestFitness = this.population[0].fitness;
 	this.bestCandidate = this.population[0].candidate;
+	this.bestAge = this.population[0].age;
 
 	if(this.terminator(this)){
 		this.isTerminated = true;

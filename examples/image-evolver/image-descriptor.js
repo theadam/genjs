@@ -3,7 +3,7 @@ function rmsDiff(data1,data2){
     for(var i = 0; i<data1.length; i++){
         squares += (data1[i]-data2[i])*(data1[i]-data2[i]);
     }
-    var rms = Math.sqrt(squares/data1.length);
+	var rms = Math.sqrt(squares/data1.length);
     return rms;
 }
 
@@ -30,6 +30,23 @@ function createTriangle(can){
 		color: getRandomColor(),
 		points: createPoints(can)
 	}
+}
+
+function cloneCanvas(oldCanvas) {
+
+    //create a new canvas
+    var newCanvas = document.createElement('canvas');
+    var context = newCanvas.getContext('2d');
+
+    //set dimensions
+    newCanvas.width = oldCanvas.width;
+    newCanvas.height = oldCanvas.height;
+
+    //apply the old canvas to the new one
+    context.drawImage(oldCanvas, 0, 0);
+
+    //return the new canvas
+    return newCanvas;
 }
 
 function drawTriangle(ctx, triangle){
@@ -59,7 +76,7 @@ function createCanvas(goal, triangles){
 function ImageEvolverDescriptor(goal){
 	return {
 		fitnessEvaluator : function(candidate){
-			var candidateData = candidate.canvas.getContext('2d').getImageData(0, 0, candidate.canvas.width, candidate.canvas.height);
+			var candidateData = candidate.canvas.getContext('2d').getImageData(0, 0, goal.width, goal.height);
 			var goalData = goal.getContext('2d').getImageData(0, 0, goal.width, goal.height);
 			return rmsDiff(candidateData.data, goalData.data);
 		},
@@ -76,41 +93,28 @@ function ImageEvolverDescriptor(goal){
 			};
 		},
 
-		pipeline : EvolverUtils.operatorPipeline(
-			EvolverUtils.wrapMater(function(parent1, parent2){
-				var triangles = [];
-				for(var i = 0; i < parent1.triangles; i++){
-					if(Math.random() <= 0.5){
-						triangles.push(parent1.triangles[i]);
-					}
-				}
-				for(var i = 0; i < parent2.triangles; i++){
-					if(Math.random() <= 0.5){
-						triangles.push(parent2.triangles[i]);
-					}
-				}
-				return {
-					triangles: triangles,
-					canvas: createCanvas(goal, triangles)
-				}
-			}), 
-			function(probability){
-				return EvolverUtils.wrapMutator(function(candidate){
-					if(Math.random() <= probability){
+		pipeline :
+				EvolverUtils.wrapMutator(function(candidate){
 						var triangle = createTriangle(goal);
-						candidate.triangles.push(triangle)
-						drawTriangle(candidate.canvas.getContext('2d'), triangle);
-					}
-					return candidate;
-				});
-			}(0.5)
-		),
-
+						var newCandidate = {};
+						newCandidate.triangles = [];
+						for(var i = 0; i < candidate.triangles.length; i++){
+							newCandidate.triangles.push(jQuery.extend(true, {}, candidate.triangles[i]))
+						}
+						newCandidate.triangles.push(triangle)
+						newCandidate.canvas = cloneCanvas(candidate.canvas);
+						drawTriangle(newCandidate.canvas.getContext('2d'), triangle);
+					return newCandidate;
+				}),
+				
 		hook : function(evolver){
 			var candidate = evolver.bestCandidate;
-			$('#gencount').html('Generation: ' + evolver.generationCount);
-			$('#candidate').get(0).getContext('2d').putImageData(
-				candidate.canvas.getContext('2d').getImageData(0, 0, candidate.canvas.width, candidate.canvas.height), 0,0);
+			$('#gencount').html('Generation: ' + evolver.generationCount + ' fitness: ' + evolver.bestFitness + ' age: ' + evolver.bestAge);
+			if(evolver.bestAge == 1){
+				$('#candidate').get(0).getContext('2d').clearRect(0,0,candidate.canvas.width, candidate.canvas.height);
+				$('#candidate').get(0).getContext('2d').putImageData(
+					candidate.canvas.getContext('2d').getImageData(0, 0, candidate.canvas.width, candidate.canvas.height), 0,0);
+			}
 		}
 	}
 }

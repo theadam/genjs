@@ -18,8 +18,9 @@
 			var ctx = can.getContext('2d');
 			var img = document.createElement("img");
 			img.onload = function(){
-				can.width = (300.0 * img.width)/ img.height;
-				can.height = 300;
+				var height = 200;
+				can.width = (height * img.width)/ img.height;
+				can.height = height;
 				var can2 = document.getElementById("candidate");
 				can2.width = can.width;
 				can2.height = can.height;
@@ -33,7 +34,7 @@
 				
 				var descriptor = new ImageEvolverDescriptor(can);
 				evolver = new Evolver(descriptor.creator, descriptor.fitnessEvaluator, descriptor.pipeline);
-				evolver.evolve({generationHook : descriptor.hook, populationSize: 10})
+				evolver.evolve({generationHook : descriptor.hook, populationSize: 2})
 			}
 			img.crossOrigin = 'Anonymous';
 			var string = document.getElementById('text').value;
