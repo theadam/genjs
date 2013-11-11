@@ -8,6 +8,7 @@
 	<div>
 		<input type='button' id='button' value='Evolve' />
 		<span width="100%" ><input type='text' value='uploads6.wikipaintings.org/images/leonardo-da-vinci/mona-lisa.jpg' id='text' width="100%"/></span>
+		<label><input id="drawCheck" type="checkbox" />Draw?</label>
 	</div>
 	<canvas id="image-canvas" width="0" height="0"></canvas>
 	<div id="gencount" ></div>
@@ -18,7 +19,7 @@
 			var ctx = can.getContext('2d');
 			var img = document.createElement("img");
 			img.onload = function(){
-				var height = 200;
+				var height = 300;
 				can.width = (height * img.width)/ img.height;
 				can.height = height;
 				var can2 = document.getElementById("candidate");
@@ -34,7 +35,7 @@
 				
 				var descriptor = new ImageEvolverDescriptor(can);
 				evolver = new Evolver(descriptor.creator, descriptor.fitnessEvaluator, descriptor.pipeline);
-				evolver.evolve({generationHook : descriptor.hook, populationSize: 2})
+				evolver.evolve({generationHook : descriptor.hook, populationSize: 10})
 			}
 			img.crossOrigin = 'Anonymous';
 			var string = document.getElementById('text').value;

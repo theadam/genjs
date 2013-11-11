@@ -88,32 +88,27 @@ function ImageEvolverDescriptor(goal){
 				triangles.push(createTriangle(goal));
 			}
 			return {
-				triangles: triangles,
 				canvas: createCanvas(goal, triangles)
 			};
 		},
 
 		pipeline :
 				EvolverUtils.wrapMutator(function(candidate){
-						var triangle = createTriangle(goal);
-						var newCandidate = {};
-						newCandidate.triangles = [];
-						for(var i = 0; i < candidate.triangles.length; i++){
-							newCandidate.triangles.push(jQuery.extend(true, {}, candidate.triangles[i]))
-						}
-						newCandidate.triangles.push(triangle)
-						newCandidate.canvas = cloneCanvas(candidate.canvas);
-						drawTriangle(newCandidate.canvas.getContext('2d'), triangle);
+					var triangle = createTriangle(goal);
+					var newCandidate = {};
+					newCandidate.canvas = cloneCanvas(candidate.canvas);
+					drawTriangle(newCandidate.canvas.getContext('2d'), triangle);
 					return newCandidate;
 				}),
 				
 		hook : function(evolver){
-			var candidate = evolver.bestCandidate;
-			$('#gencount').html('Generation: ' + evolver.generationCount + ' fitness: ' + evolver.bestFitness + ' age: ' + evolver.bestAge);
-			if(evolver.bestAge == 1){
-				$('#candidate').get(0).getContext('2d').clearRect(0,0,candidate.canvas.width, candidate.canvas.height);
-				$('#candidate').get(0).getContext('2d').putImageData(
-					candidate.canvas.getContext('2d').getImageData(0, 0, candidate.canvas.width, candidate.canvas.height), 0,0);
+			if($('#drawCheck').get(0).checked || evolver.generationCount % 100 == 0){
+				var candidate = evolver.bestCandidate;
+				$('#gencount').html('Generation: ' + evolver.generationCount + ' fitness: ' + evolver.bestFitness + ' age: ' + evolver.bestAge);
+				if(evolver.bestAge == 1 && $('#drawCheck').get(0).checked){
+					$('#candidate').get(0).getContext('2d').putImageData(
+						candidate.canvas.getContext('2d').getImageData(0, 0, candidate.canvas.width, candidate.canvas.height), 0,0);
+				}
 			}
 		}
 	}
