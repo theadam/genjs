@@ -16,20 +16,8 @@ function getRandomColor() {
     return color;
 }
 
-function createPoints(can){
-	var points = [];
-	for(var i = 0; i < 3; i++){
-		points.push([Math.floor(Math.random() * can.width), Math.floor(Math.random() * can.height)])
-	}
-	return points;
-}
-
-function createTriangle(can){
-	return {
-		alpha: Math.random(),
-		color: getRandomColor(),
-		points: createPoints(can)
-	}
+function createPoint(can){
+	return [Math.floor(Math.random() * can.width), Math.floor(Math.random() * can.height)];
 }
 
 function cloneCanvas(oldCanvas) {
@@ -49,66 +37,62 @@ function cloneCanvas(oldCanvas) {
     return newCanvas;
 }
 
-function drawTriangle(ctx, triangle){
-	var points = triangle.points;
+function drawCircle(canvas){
+	var ctx = canvas.getContext('2d');
+	var maxRad = Math.max(canvas.width, canvas.height);
+	var rad = Math.random() * maxRad;
+	var point = createPoint(canvas);
 	ctx.beginPath();
-	ctx.globalAlpha = triangle.alpha;
-	ctx.fillStyle = triangle.color;
-	ctx.moveTo(points[0][0], points[0][1]);
-	ctx.lineTo(points[1][0], points[1][1]);
-	ctx.lineTo(points[2][0], points[2][1]);
+	ctx.arc(point[0], point[1], rad, 0, 2*Math.PI);
+	ctx.fill();
+}
+
+function drawTriangle(canvas){
+	var ctx = canvas.getContext('2d');
+	ctx.beginPath();
+	ctx["moveTo"].apply(ctx, createPoint(canvas));
+	ctx["lineTo"].apply(ctx, createPoint(canvas));
+	ctx["lineTo"].apply(ctx, createPoint(canvas));	
 	ctx.closePath();
 	ctx.fill();
 }
 
-function createCanvas(goal, triangles){
-	var canvas = document.createElement('canvas');
+function drawShape(canvas, shapeFunc){
 	var ctx = canvas.getContext('2d');
-	canvas.height = goal.height;
-	canvas.width = goal.width;
-	for(var i = 0; i < triangles.length; i++){
-		var triangle = triangles[i];
-		drawTriangle(ctx, triangle);
-	}
-	return canvas;
+	ctx.globalAlpha = Math.random();
+	ctx.fillStyle = getRandomColor();
+	shapeFunc(canvas);
 }
 
-function ImageEvolverDescriptor(goal){
+function ImageEvolverDescriptor(goal, drawFunc){
 	return {
 		fitnessEvaluator : function(candidate){
-			var candidateData = candidate.canvas.getContext('2d').getImageData(0, 0, goal.width, goal.height);
+			var candidateData = candidate.getContext('2d').getImageData(0, 0, candidate.width, candidate.height);
 			var goalData = goal.getContext('2d').getImageData(0, 0, goal.width, goal.height);
 			return rmsDiff(candidateData.data, goalData.data);
 		},
 
 		creator : function(opts){
-			var maxStartingTriangles = 10;
-			var triangles = [];
-			for(var i = 0; i < (Math.random() * maxStartingTriangles) + 1; i++){
-				triangles.push(createTriangle(goal));
-			}
-			return {
-				canvas: createCanvas(goal, triangles)
-			};
+			var canvas = document.createElement('canvas');
+			canvas.height = goal.height;
+			canvas.width = goal.width;
+			drawShape(canvas, drawFunc);
+			return canvas;
 		},
 
 		pipeline :
 				EvolverUtils.wrapMutator(function(candidate){
-					var triangle = createTriangle(goal);
-					var newCandidate = {};
-					newCandidate.canvas = cloneCanvas(candidate.canvas);
-					drawTriangle(newCandidate.canvas.getContext('2d'), triangle);
+					var newCandidate = cloneCanvas(candidate);
+					drawShape(newCandidate, drawFunc);
 					return newCandidate;
 				}),
 				
 		hook : function(evolver){
-			if($('#drawCheck').get(0).checked || evolver.generationCount % 100 == 0){
-				var candidate = evolver.bestCandidate;
-				$('#gencount').html('Generation: ' + evolver.generationCount + ' fitness: ' + evolver.bestFitness + ' age: ' + evolver.bestAge);
-				if(evolver.bestAge == 1 && $('#drawCheck').get(0).checked){
-					$('#candidate').get(0).getContext('2d').putImageData(
-						candidate.canvas.getContext('2d').getImageData(0, 0, candidate.canvas.width, candidate.canvas.height), 0,0);
-				}
+			var candidate = evolver.bestCandidate;
+			$('#gencount').html('Generation: ' + evolver.generationCount + ' fitness: ' + evolver.bestFitness + ' age: ' + evolver.bestAge);
+			if(evolver.bestAge == 1){
+				$('#candidate').get(0).getContext('2d').putImageData(
+					candidate.getContext('2d').getImageData(0, 0, candidate.width, candidate.height), 0,0);
 			}
 		}
 	}

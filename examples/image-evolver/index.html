@@ -5,10 +5,12 @@
 	<script src="http://code.jquery.com/jquery-1.10.2.min.js"></script>
 </head>
 <body>
-	<div>
+	<div id="setup">
 		<input type='button' id='button' value='Evolve' />
 		<span width="100%" ><input type='text' value='uploads6.wikipaintings.org/images/leonardo-da-vinci/mona-lisa.jpg' id='text' width="100%"/></span>
-		<label><input id="drawCheck" type="checkbox" />Draw?</label>
+		<br/>
+		<input type="radio" value="drawTriangle" name="shapes" checked/>Triangles
+		<input type="radio" value="drawCircle" name="shapes"/>Circles
 	</div>
 	<canvas id="image-canvas" width="0" height="0"></canvas>
 	<div id="gencount" ></div>
@@ -19,6 +21,9 @@
 			var ctx = can.getContext('2d');
 			var img = document.createElement("img");
 			img.onload = function(){
+				$("#setup").hide();
+				var drawString = $("#setup input[type|=radio]:checked").get(0).value;
+				var drawFunc = window[drawString];
 				var height = 300;
 				can.width = (height * img.width)/ img.height;
 				can.height = height;
@@ -33,7 +38,7 @@
 					evolver = undefined;
 				}
 				
-				var descriptor = new ImageEvolverDescriptor(can);
+				var descriptor = new ImageEvolverDescriptor(can, drawFunc);
 				evolver = new Evolver(descriptor.creator, descriptor.fitnessEvaluator, descriptor.pipeline);
 				evolver.evolve({generationHook : descriptor.hook, populationSize: 10})
 			}
