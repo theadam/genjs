@@ -9,8 +9,11 @@
 		<input type='button' id='button' value='Evolve' />
 		<span width="100%" ><input type='text' value='uploads6.wikipaintings.org/images/leonardo-da-vinci/mona-lisa.jpg' id='text' width="100%"/></span>
 		<br/>
+		<input type='text' value='10' id='popSize'/>Population Size
+		<br/>
 		<input type="radio" value="drawTriangle" name="shapes" checked/>Triangles
 		<input type="radio" value="drawCircle" name="shapes"/>Circles
+		<input type="radio" value="drawPoint" name="shapes"/>Points
 	</div>
 	<canvas id="image-canvas" width="0" height="0"></canvas>
 	<div id="gencount" ></div>
@@ -40,7 +43,7 @@
 				
 				var descriptor = new ImageEvolverDescriptor(can, drawFunc);
 				evolver = new Evolver(descriptor.creator, descriptor.fitnessEvaluator, descriptor.pipeline);
-				evolver.evolve({generationHook : descriptor.hook, populationSize: 10})
+				evolver.evolve({generationHook : descriptor.hook, populationSize: Number($('#popSize').get(0).value)})
 			}
 			img.crossOrigin = 'Anonymous';
 			var string = document.getElementById('text').value;

@@ -37,11 +37,18 @@ function cloneCanvas(oldCanvas) {
     return newCanvas;
 }
 
+function drawPoint(canvas){
+	var ctx = canvas.getContext('2d');
+	var point = createPoint(canvas);
+	ctx.fillRect(point[0], point[1], 1, 1);
+}
+
 function drawCircle(canvas){
 	var ctx = canvas.getContext('2d');
 	var maxRad = Math.max(canvas.width, canvas.height);
 	var rad = Math.random() * maxRad;
 	var point = createPoint(canvas);
+	ctx.globalAlpha = Math.random();
 	ctx.beginPath();
 	ctx.arc(point[0], point[1], rad, 0, 2*Math.PI);
 	ctx.fill();
@@ -49,6 +56,7 @@ function drawCircle(canvas){
 
 function drawTriangle(canvas){
 	var ctx = canvas.getContext('2d');
+	ctx.globalAlpha = Math.random();
 	ctx.beginPath();
 	ctx["moveTo"].apply(ctx, createPoint(canvas));
 	ctx["lineTo"].apply(ctx, createPoint(canvas));
@@ -59,7 +67,6 @@ function drawTriangle(canvas){
 
 function drawShape(canvas, shapeFunc){
 	var ctx = canvas.getContext('2d');
-	ctx.globalAlpha = Math.random();
 	ctx.fillStyle = getRandomColor();
 	shapeFunc(canvas);
 }
